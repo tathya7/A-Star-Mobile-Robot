@@ -176,3 +176,122 @@ def cost2move(x,y,theta,rpm_left,rpm_right):
         
 
     return np.round(x1,3),np.round(y1,3),np.round(th1,2),distance, rpm_left, rpm_right
+
+
+################################################# USER INPUT COORDINATES #################################################
+
+check = True
+
+while check:
+    x_start = int(input("Enter the initial X position ({} to {}): ".format(0+CLEARANCE, CANVAS_WIDTH-CLEARANCE-1)))
+    y_start = int(input("Enter the initial Y Position ({} to {}): ".format(0+CLEARANCE, CANVAS_HEIGHT-CLEARANCE-1)))
+    th_start = int(input("Enter the initial Orientation (0 to 360): "))
+    print("Your Start Node Is (X,Y,Angle): ", x_start, y_start, th_start)
+    # Converting the coordinates to the instructed coordinate system
+    y_start = CANVAS_HEIGHT - y_start - 1 
+    # Checks if the given node is in the free space
+    if canvas[y_start, x_start,1] == 0:
+        cv2.circle(canvas,(x_start, y_start), 2, (0, 180, 0), -1)
+        check = False
+    # If the starting node is in obstacle space
+    else:
+        print("Starting Position is in the Obstacle space! Re-Enter the Position")
+
+check = True
+
+while check:
+    x_goal = int(input("Enter the Destination X Position ({} to {}): ".format(0+CLEARANCE, CANVAS_WIDTH-CLEARANCE-1)))
+    y_goal = int(input("Enter the Destination Y Position ({} to {}): ".format(0+CLEARANCE, CANVAS_HEIGHT-CLEARANCE-1)))
+    th_goal= int(input("Enter the Goal Orientation (0 to 360): "))
+
+    print("Your Goal Node Is (X,Y,Angle): ", x_goal, y_goal, th_goal)
+    # Converting the coordinates to the instructed coordinate system
+    y_goal = CANVAS_HEIGHT - y_goal - 1 
+    # Checks if the given node is in the free space
+    if canvas[y_goal, x_goal,1] == 0:
+        # Checks if the start node and goal node are same
+        if (x_start, y_start) == (x_goal, y_goal):
+            print("Error! Start and Goal Position Cannot be Same")
+        else:
+            check = False 
+    else:
+        print("Goal Position is in the Obstacle space! Re-Enter the Position")
+
+
+start = time.time()
+
+q = []
+heapq.heappush(q,(0,x_start,y_start,th_start, actionset[0][0],actionset[0][1]))
+child2parent = {}
+
+# Modify the initial values to the visited space
+x_start_mod = modify_value(x_start,dist_threshold)
+y_start_mod = modify_value(y_start,dist_threshold)
+th_start_mod = modify_value(th_start, ang_threshold)
+
+#Initializing visited
+visited = {(x_start_mod, y_start_mod, th_start_mod):True}
+node_cost = {(x_start_mod, y_start_mod, th_start_mod):0} 
+cost2come = {(x_start_mod, y_start_mod, th_start_mod):0}
+
+print("Generating Path......")
+reached = False
+
+while q:
+    cst, x_pos, y_pos,th, rpm_pos_l, rpm_pos_r = heapq.heappop(q)
+
+    x_mod = modify_value(x_pos,dist_threshold)
+    y_mod = modify_value(y_pos,dist_threshold)
+    th_mod = modify_value(th,ang_threshold)
+
+    prev_cst = cost2come[(x_mod, y_mod, th_mod)] 
+
+    if goal_check(x_pos, y_pos,th, x_goal, y_goal, th_goal) == True:
+        print("Goal Reached", x_pos, y_pos, th, rpm_pos_l, rpm_pos_r)
+        reached = True
+        break
+
+    for action in actionset:
+        node = cost2move(x_pos, y_pos, th, action[0], action[1])
+        if node is not None:
+
+            new_x, new_y, new_th, action_cst, rpm_left, rpm_right = node
+
+            # Converting it to int to plot in map
+            x_map = int(round(new_x*2)/2)
+            y_map = int(round(new_y*2)/2)
+            th_map = int(round(new_th*2)/2)
+
+
+            if 0 <= new_x < CANVAS_WIDTH-1 and 0 <= new_y < CANVAS_HEIGHT-1 and canvas[y_map, x_map, 1] == 0:
+
+                # Modifying for visited node space
+                newx_mod = modify_value(x_map, dist_threshold)
+                newy_mod = modify_value(y_map, dist_threshold)
+                newth_mod = modify_value(th_map, ang_threshold)
+
+                if (newx_mod, newy_mod, newth_mod) not in visited:
+
+                    cost2come[(newx_mod,newy_mod,newth_mod)] = prev_cst + action_cst
+
+                    node_cost[(newx_mod,newy_mod,newth_mod)] = cost2come[(newx_mod,newy_mod,newth_mod)] + dist((new_x, new_y), (x_goal, y_goal))
+
+                    heapq.heappush(q,(node_cost[(newx_mod,newy_mod,newth_mod)], new_x, new_y, new_th, rpm_left,rpm_right))
+
+                    child2parent[(new_x, new_y,new_th,rpm_left, rpm_right)] = (x_pos, y_pos, th, rpm_pos_l, rpm_pos_r)
+                    visited[(newx_mod,newy_mod,newth_mod)] = True
+
+                if cost2come[(newx_mod,newy_mod,newth_mod)] > prev_cst + action_cst :
+                    cost2come[(newx_mod,newy_mod,newth_mod)] = prev_cst + action_cst
+                    node_cost[(newx_mod,newy_mod,newth_mod)] = cost2come[(newx_mod,newy_mod,newth_mod)] +  dist((new_x, new_y), (x_goal, y_goal))
+                    child2parent[(new_x, new_y,new_th,rpm_left, rpm_right)] = (x_pos, y_pos, th, rpm_pos_l, rpm_pos_r)
+
+end = time.time()
+
+
+# If the goal is not reachable
+if reached == False:
+    print("Goal out of bounds")
+    
+#  Printing the runtime of the algorithm
+print("Generating Video..., Algorithm Time is: ", (end-start))
