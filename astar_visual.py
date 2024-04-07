@@ -120,3 +120,59 @@ for x in range(x_center - radius, x_center + radius):
 width_small = int(CANVAS_WIDTH / 4)
 height_small = int(CANVAS_HEIGHT / 4)
 canvas_small = cv2.resize(canvas, (width_small, height_small))
+
+################################# DEFINING GOAL CHECK  #############################################
+
+# Checks if the node is goal node or not
+def goal_check(x_curr, y_curr, th_curr, x_tar, y_tar, th_tar):
+    # if np.sqrt((x_curr-x_tar)**2 + (y_curr-y_tar)**2) <=20 and abs(th_curr-th_tar) <= theta_threshold:
+    if np.sqrt((x_curr-x_tar)**2 + (y_curr-y_tar)**2) < 10:
+        return True
+    else:
+        return False
+
+################################# DEFINING MODIFY VALUE FUNCTION #############################################
+
+# To convert it into visited node space representation
+def modify_value(elem, thresh):
+    modified = int(round(elem*2)/2)/thresh
+    return int(modified)
+
+
+################################# DEFINING COST FUNCTION #############################################
+def cost2move(x,y,theta,rpm_left,rpm_right):
+    t = 0
+    distance = 0
+
+    x_old = x
+    y_old = y
+    th_old = theta
+
+    x1 = x
+    y1 = y
+    th1 = np.deg2rad(theta)
+    dt = 0.1
+
+    ang_vel_l  = 2 * np.pi * rpm_left  / 60
+    ang_vel_r = 2 * np.pi * rpm_right / 60
+
+    while t<0.6:
+        t = t+dt
+        delta_x = ROBOT_WHEEL_RADIUS/2 *(ang_vel_l + ang_vel_r) * np.cos(th1)
+        delta_y = ROBOT_WHEEL_RADIUS/2 * (ang_vel_l + ang_vel_r) * np.sin(th1)
+        delta_th = (ROBOT_WHEEL_RADIUS / BASE_LENGTH) * (ang_vel_r - ang_vel_l)
+
+        x1 = x1 + (delta_x*dt)
+        y1 = y1 + (delta_y*dt)
+        th1 = th1 + np.rad2deg(delta_th) * dt
+
+        if canvas[int(round(y1*2)/2), int(round(x1*2)/2), 1] == 0:      
+            distance += sqrt((delta_x*dt)**2+(delta_y*dt)**2)
+            t = t+dt
+
+        else:
+            x1, y1, th1 = x_old, y_old, th_old
+            break    
+        
+
+    return np.round(x1,3),np.round(y1,3),np.round(th1,2),distance, rpm_left, rpm_right
