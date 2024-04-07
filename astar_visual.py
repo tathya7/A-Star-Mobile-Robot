@@ -295,3 +295,95 @@ if reached == False:
     
 #  Printing the runtime of the algorithm
 print("Generating Video..., Algorithm Time is: ", (end-start))
+
+
+
+######################################### GENERATING OPTIMAL PATH #################################################
+
+path = []
+
+path.append((x_pos, y_pos, th,rpm_pos_l, rpm_pos_r))
+x,y, th, rpml, rpmr = x_pos, y_pos, th, rpm_pos_l, rpm_pos_r
+while (x,y,th,rpml, rpmr) in child2parent:
+
+    path.append((x,y, th,rpml, rpmr))
+    (x,y, th, rpml, rpmr) = child2parent[(x,y, th, rpml, rpmr)]
+
+path.append((x_start,y_start, th_start, actionset[0][0], actionset[0][1]))
+path.reverse()
+
+#################################################   GENERATING VIDEO       #################################################
+
+# canvas_small = cv2.resize(canvas, (width_small, height_small))
+path_vid = cv2.VideoWriter('a_star_path_final4.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 50, (width_small, height_small))
+
+cv2.circle(canvas, (int(x_start), int(y_start)), 10, (92, 11, 227), -1)
+cv2.circle(canvas, (int(x_goal), int(y_goal)), 10, (0, 165, 255), -1)
+
+num_frames = 250
+j = 0
+
+for (x_, y_, angle, rl, rr) in child2parent:
+    j += 1
+    t = 0
+    distance = 0
+    x_par = x_
+    y_par = y_
+
+    x1 = x_
+    y1 = y_
+    th1 = np.deg2rad(angle)
+    dt = 0.1
+
+    ang_left = 2 * np.pi * rl / 60
+    ang_right = 2 * np.pi * rr / 60
+
+    while t<0.6:
+        # t = t+dt
+        delta_x = ROBOT_WHEEL_RADIUS/2 *(ang_left + ang_right) * np.cos(th1)
+        delta_y = ROBOT_WHEEL_RADIUS/2 * (ang_left + ang_right) * np.sin(th1)
+        delta_th = (ROBOT_WHEEL_RADIUS / BASE_LENGTH) * (ang_right - ang_left)
+
+        x1 = x1 + (delta_x*dt)
+        y1 = y1 + (delta_y*dt)
+        th1 = th1 + np.rad2deg(delta_th) * dt
+
+        x_pix = int(round(x1*2)/2)
+        y_pix = int(round(y1*2)/2)
+
+        if canvas[y_pix, x_pix, 1] == 0:
+            cv2.line(canvas, (int(x_par), int(y_par)), (x_pix, y_pix),(225, 105, 65), 4)
+            x_par, y_par = x1,y1
+            t = t+dt
+
+        else:
+            break
+            
+
+
+    if (j == num_frames):
+        canvas_s = cv2.resize(canvas, (width_small, height_small))
+        cv2.imshow("Canvas", canvas_s)
+        path_vid.write(canvas_s)
+        cv2.waitKey(1)
+        j=0
+
+# Draw the start and goal nodes on the canvas
+cv2.circle(canvas, (x_start, y_start), 10, (0, 255, 0), 20)
+cv2.circle(canvas, (x_goal, y_goal), 10, (0, 165, 255), 20)
+
+for i in range(len(path)-1):
+    
+    cv2.line(canvas,(int(path[i][0]),int(path[i][1])), (int(path[i+1][0]),int(path[i+1][1])), (0, 0, 255),8)
+    canvas_s = cv2.resize(canvas, (width_small, height_small))
+    cv2.imshow('Video', canvas_s)
+    path_vid.write(canvas_s)
+    cv2.waitKey(1)
+
+last_frame = canvas_s
+for _ in range(200):
+    path_vid.write(last_frame)
+
+path_vid.release()
+cv2.waitKey(0)
+cv2.destroyAllWindows()
