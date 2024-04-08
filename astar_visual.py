@@ -140,42 +140,54 @@ def modify_value(elem, thresh):
 
 
 ################################# DEFINING COST FUNCTION #############################################
-def cost2move(x,y,theta,rpm_left,rpm_right):
+def cost2move(x, y, theta, rpm_left, rpm_right):
+    # Initialize time and distance
     t = 0
     distance = 0
 
+    # Store initial position and orientation
     x_old = x
     y_old = y
     th_old = theta
 
+    # Initialize variables for current position and orientation
     x1 = x
     y1 = y
-    th1 = np.deg2rad(theta)
-    dt = 0.1
+    th1 = np.deg2rad(theta)  # Convert initial angle from degrees to radians
+    dt = 0.1  # Time step for simulation
 
-    ang_vel_l  = 2 * np.pi * rpm_left  / 60
+    # Calculate angular velocities of left and right wheels in radians per second
+    ang_vel_l = 2 * np.pi * rpm_left / 60
     ang_vel_r = 2 * np.pi * rpm_right / 60
 
-    while t<0.6:
-        t = t+dt
-        delta_x = ROBOT_WHEEL_RADIUS/2 *(ang_vel_l + ang_vel_r) * np.cos(th1)
-        delta_y = ROBOT_WHEEL_RADIUS/2 * (ang_vel_l + ang_vel_r) * np.sin(th1)
+    # Main simulation loop running for 0.6 seconds
+    while t < 0.6:
+        t = t + dt  # Increment time by time step
+
+        # Calculate incremental changes in position and orientation using kinematic model
+        delta_x = ROBOT_WHEEL_RADIUS / 2 * (ang_vel_l + ang_vel_r) * np.cos(th1)
+        delta_y = ROBOT_WHEEL_RADIUS / 2 * (ang_vel_l + ang_vel_r) * np.sin(th1)
         delta_th = (ROBOT_WHEEL_RADIUS / BASE_LENGTH) * (ang_vel_r - ang_vel_l)
 
-        x1 = x1 + (delta_x*dt)
-        y1 = y1 + (delta_y*dt)
-        th1 = th1 + np.rad2deg(delta_th) * dt
+        # Update current position and orientation
+        x1 = x1 + (delta_x * dt)
+        y1 = y1 + (delta_y * dt)
+        th1 = th1 + np.rad2deg(delta_th) * dt  # Convert incremental angle to degrees
 
-        if canvas[int(round(y1*2)/2), int(round(x1*2)/2), 1] == 0:      
-            distance += sqrt((delta_x*dt)**2+(delta_y*dt)**2)
-            t = t+dt
+        # Checking if the new position is occupied by an obstacle.
+        if canvas[int(round(y1 * 2) / 2), int(round(x1 * 2) / 2), 1] == 0:
+            # If not updating the total distance traveled
+            distance += sqrt((delta_x * dt) ** 2 + (delta_y * dt) ** 2)
+            t = t + dt
 
         else:
+            # If the new position is occupied, revert back to the old position and orientation
             x1, y1, th1 = x_old, y_old, th_old
-            break    
-        
+            break  # Exit the loop
 
-    return np.round(x1,3),np.round(y1,3),np.round(th1,2),distance, rpm_left, rpm_right
+    # Return the final position, orientation, distance traveled, and wheel velocities
+    return np.round(x1, 3), np.round(y1, 3), np.round(th1, 2), distance, rpm_left, rpm_right
+
 
 
 ################################################# USER INPUT COORDINATES #################################################
