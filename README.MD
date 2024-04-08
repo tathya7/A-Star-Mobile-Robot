@@ -10,6 +10,7 @@ In this project we implement the A* path planning algorithm to find the shortest
 Added the TAs as collaborators and the link for the github repo is : 
 
 Part1 Video Link : https://www.youtube.com/watch?v=tYxHOVnaW3Y
+Part2 Video Link : https://youtu.be/mkmKPcqHzUI
 
 ## Requirements that were used in this 
 
