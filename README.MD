@@ -84,7 +84,7 @@ Before running the ROS package, ensure you have the following prerequisites inst
 
 2. Clone the repository to your local computer:
     ```bash
-    git clone https://github.com/yourusername/your-repository.git
+    git clone https://github.com/tathya7/A-Star-Mobile-Robot.git
     ```
 
 2. Enable ROS commands:
@@ -119,6 +119,7 @@ Before running the ROS package, ensure you have the following prerequisites inst
 
 - In the simulation the Start point and the Goal point that are feeded are START = (500, 1000) and GOAL = (2400, 500)
 - The start point in this simulation is fixed at (500, 1000) but the Goal point can be changed by the user
+- If the clearance is too high the code will show certain non obstacle points as out of bounds because the code is taking the radius of the robot into consideration. With high clearance the path becomes narrow for the robot to reach the said goal. 
 
 ## Output
 - When the package is run first you can see the path that is generated for those points. Press any key to close the window.
