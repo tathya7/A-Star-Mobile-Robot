@@ -61,5 +61,66 @@ Part2 Video Link : https://youtu.be/mkmKPcqHzUI
 - Video: `a_star_path_final.mp4` showing the path planning process and the final path.
 
 
-## Steps to run Part 2
+## Steps to Run Part 2
+
+# Running a ROS Package
+
+This repository contains a ROS package for [describe your package here].
+
+## Prerequisites
+
+Before running the ROS package, ensure you have the following prerequisites installed:
+
+- ROS (Robot Operating System)
+- [Other dependencies specific to your ROS package]
+
+## Installation
+
+1. Create a workspace:
+   ```bash
+    mkdir -p project3_ws/src
+    cd ~/project3_ws/src
+    ```
+
+2. Clone the repository to your local computer:
+    ```bash
+    git clone https://github.com/yourusername/your-repository.git
+    ```
+
+2. Enable ROS commands:
+   ```bash
+    source /opt/ros/galactic/setup.bash
+    ```
+
+3. Build the ROS package using:
+    ```bash
+    cd ~/project3_ws
+    colcon build --packages-select turtlebot3_project3
+    ```
+
+4. Source ROS (Package will be identified):
+    ```bash
+    source install/setup.bash
+    ```
+
+## Running
+
+1. Launch the Gazebo environment:
+    ```bash
+    ros2 launch turtlebot3_project3 competition_world.launch
+    ```
+2. Launch the ROS package for running the turtlebot3:
+   ```bash
+    ros2 run turtlebot3_project3 ros_sim.py
+    ```
+
+
+## Additional Notes
+
+- In the simulation the Start point and the Goal point that are feeded are START = (500, 1000) and GOAL = (2400, 500)
+- The start point in this simulation is fixed at (500, 1000) but the Goal point can be changed by the user
+
+## Output
+- When the package is run first you can see the path that is generated for those points. Press any key to close the window.
+- Then you can see the the turtlebot following the that was generated in the simulation.
 
