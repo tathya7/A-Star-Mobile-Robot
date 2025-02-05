@@ -1,16 +1,11 @@
-## Authors 
-### Tathya Bhatt (tathyab | 120340246) & Mohammed Munnawar (mmunawwa | 120241642)
 
 # A* Path Planning Algorithm for TurtleBot Navigation
+## Author
+### Tathya Bhatt
 
 In this project we implement the A* path planning algorithm to find the shortest path from the start point to the goal point while avoiding the obstacles present in the environment and eventually simulate this in a gazebo world with the generated path.
 
-## Github Repository & Video Links
-
-Added the TAs as collaborators and the link for the github repo is : 
-
-Part1 Video Link : https://www.youtube.com/watch?v=tYxHOVnaW3Y
-Part2 Video Link : https://youtu.be/mkmKPcqHzUI
+![](astar.gif)
 
 ## Requirements that were used in this 
 
